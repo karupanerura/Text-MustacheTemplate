@@ -5,7 +5,7 @@ requires 'Scalar::Util';
 requires 'perl', '5.022000';
 
 on configure => sub {
-    requires 'Module::Build::Tiny', '0.035';
+    requires 'Module::Build', '0.4005';
 };
 
 on test => sub {

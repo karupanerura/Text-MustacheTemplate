@@ -6,31 +6,29 @@ jobs:
     strategy:
       matrix:
         perl:
-          [
-            "5.38",
-            "5.36",
-            "5.34",
-            "5.32",
-            "5.30",
-            "5.28",
-            "5.26",
-            "5.24",
-            "5.22",
-          ]
+          - "5.38"
+          - "5.36"
+          - "5.34"
+          - "5.32"
+          - "5.30"
+          - "5.28"
+          - "5.26"
+          - "5.24"
+          - "5.22"
     name: Perl ${{ matrix.perl }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup perl
         uses: shogo82148/actions-setup-perl@v1
         with:
           perl-version: ${{ matrix.perl }}
       - name: Install dependencies
-        run: cpanm -nq --installdeps --with-develop --with-recommends .
-      - name: Install Devel::Cover::Report::Codecov
+        run: cpanm -nq --installdeps .
+      - name: Install CI modules
         run: cpanm -nq Devel::Cover::Report::Codecov
       - name: Build
         run: perl Build.PL && ./Build build
       - name: Test
         run: cover -test
-      - name: Report to Codecov
-        run: cover -report codecov
+      # - name: Report to Codecov
+      #   run: cover -report codecov
