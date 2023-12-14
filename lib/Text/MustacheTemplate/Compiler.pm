@@ -103,7 +103,6 @@ sub _compile {
     $code .= (' ' x $indent)."sub {\n";
     $code .= (' ' x $indent)."    local \@_CTX = \@_;\n";
     $code .= (' ' x $indent)."    local (\$_OPEN_DELIMITER, \$_CLOSE_DELIMITER) = ($default_open_delimiter_perl, $default_close_delimiter_perl);\n";
-    $code .= (' ' x $indent)."    my (\$_current_open_delimiter, \$_current_close_delimiter) = ($current_open_delimiter_perl, $current_close_delimiter_perl);\n";
     $code .= (' ' x $indent)."    local \$Text::MustacheTemplate::Evaluator::LAMBDA_RENDERER = \\&_render_template_in_context;\n" if $indent == 4;
     $code .= "\n";
     $code .= (' ' x $indent)."    my \$_result = $initial_text_perl;\n";
@@ -213,7 +212,6 @@ sub _compile_body {
         } elsif ($type == SYNTAX_DELIMITER) {
             my (undef, $open_delimiter, $close_delimiter) = @$syntax;
             ($_CURRENT_OPEN_DELIMITER, $_CURRENT_CLOSE_DELIMITER) = ($open_delimiter, $close_delimiter);
-            $code .= (' ' x $indent)."(\$_current_open_delimiter, \$_current_close_delimiter) = (".B::perlstring($open_delimiter).", ".B::perlstring($close_delimiter).");\n";
         } elsif ($type == SYNTAX_VARIABLE) {
             $code .= _compile_variable($syntax, $indent, $result);
         } elsif ($type == SYNTAX_BOX) {
@@ -262,16 +260,7 @@ sub _compile_box {
         my (undef, undef, $name, $inner_template, $children) = @$syntax;
         my $no_lambda = @CONTEXT_HINT && !$Text::MustacheTemplate::LAMBDA_TEMPLATE_RENDERING;
 
-        my ($open_delimiter, $close_delimiter) = ($_CURRENT_OPEN_DELIMITER, $_CURRENT_CLOSE_DELIMITER);
         my $inner_code = _compile_body($children, $no_lambda ? $indent+4 : $indent+8, $result);
-
-        # reset delimiter before loop
-        my $delimiter_reset;
-        if ($_CURRENT_OPEN_DELIMITER ne $open_delimiter || $_CURRENT_CLOSE_DELIMITER ne $close_delimiter) {
-            $delimiter_reset = "(\$_current_open_delimiter, \$_current_close_delimiter) = (".B::perlstring($_CURRENT_OPEN_DELIMITER).", ".B::perlstring($_CURRENT_CLOSE_DELIMITER).");\n";            
-        }
-
-        $inner_template = B::perlstring($inner_template);
         my $evaluator = $name eq '.'
             ? 'evaluate_section($_CTX[-1])'
             : 'evaluate_section_variable(\@_CTX, '.(join ', ', map B::perlstring($_), split /\./ano, $name).')';
@@ -280,25 +269,25 @@ sub _compile_box {
             my $code = (' ' x $indent)."push \@_CTX => {};\n";
             $code .= (' ' x $indent)."for my \$ctx ($evaluator) {\n";
             $code .= (' ' x $indent)."    \$_CTX[-1] = \$ctx;\n";
-            $code .= (' ' x $indent)."    $delimiter_reset" if defined $delimiter_reset;
-            $code .=                          $inner_code;
+            $code .=                      $inner_code;
             $code .= (' ' x $indent)."}\n";
             $code .= (' ' x $indent)."pop \@_CTX;\n";
             return $code;
         }
 
+        my ($open_delimiter, $close_delimiter) = map B::perlstring($_), ($_CURRENT_OPEN_DELIMITER, $_CURRENT_CLOSE_DELIMITER);
+        $inner_template = B::perlstring($inner_template);
         my $code = (' ' x $indent)."\@_section = $evaluator;\n";
         $code .= (' ' x $indent)."if (\$Text::MustacheTemplate::LAMBDA_TEMPLATE_RENDERING && \@_section == 1 && ref \$_section[0] eq 'CODE') {\n";
         $code .= (' ' x $indent)."    my \$code = \$_section[0];\n";
         $code .= (' ' x $indent)."    \$_tmp = \$code->($inner_template);\n";
-        $code .= (' ' x $indent)."    local (\$_OPEN_DELIMITER, \$_CLOSE_DELIMITER) = (\$_current_open_delimiter, \$_current_close_delimiter);\n";
+        $code .= (' ' x $indent)."    local (\$_OPEN_DELIMITER, \$_CLOSE_DELIMITER) = ($open_delimiter, $close_delimiter);\n";
         $code .= (' ' x $indent)."    $result .= _render_template_in_context(\$_tmp);\n";
         $code .= (' ' x $indent)."} else {\n";
         $code .= (' ' x $indent)."    my \@section = \@_section;\n"; # copy to avoid rewrite same varialbe in recurse
         $code .= (' ' x $indent)."    push \@_CTX => {};\n";
         $code .= (' ' x $indent)."    for my \$ctx (\@section) {\n";
         $code .= (' ' x $indent)."        \$_CTX[-1] = \$ctx;\n";
-        $code .= (' ' x $indent)."        $delimiter_reset" if defined $delimiter_reset;
         $code .=                          $inner_code;
         $code .= (' ' x $indent)."    }\n";
         $code .= (' ' x $indent)."    pop \@_CTX;\n";
@@ -331,11 +320,6 @@ sub _compile_box {
         my $code = (' ' x $indent)."unless (exists \$_BLOCKS{$name}) {\n";
         $code .= (' ' x $indent)."    \$_BLOCKS{$name} = $sub_code";
         $code .= (' ' x $indent)."}\n";
-
-        # apply inner delimiter change into current scope
-        if ($_CURRENT_OPEN_DELIMITER ne $open_delimiter || $_CURRENT_CLOSE_DELIMITER ne $close_delimiter) {
-            $code .= (' ' x $indent)."(\$_current_open_delimiter, \$_current_close_delimiter) = (".B::perlstring($_CURRENT_OPEN_DELIMITER).", ".B::perlstring($_CURRENT_CLOSE_DELIMITER).");\n";            
-        }
         return $code;
     } elsif ($type == BOX_PARENT) {
         local $_PARENT = $syntax;
