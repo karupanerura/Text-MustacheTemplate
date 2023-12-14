@@ -26,6 +26,11 @@ jobs:
           perl-version: ${{ matrix.perl }}
       - name: Install dependencies
         run: cpanm -nq --installdeps --with-develop --with-recommends .
-      - name: Run test
-        run: prove -lr t
-
+      - name: Install Devel::Cover::Report::Codecov
+        run: cpanm -nq Devel::Cover::Report::Codecov
+      - name: Build
+        run: perl Build.PL && ./Build build
+      - name: Test
+        run: cover -test
+      - name: Report to Codecov
+        run: cover -report codecov
