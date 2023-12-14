@@ -30,27 +30,28 @@ sub compile {
     my ($class, $ast) = @_;
     die "Invalid AST: empty AST" unless @$ast;
 
-    my $first_delimiter_syntax = $ast->[0];
+    my @ast = @$ast;
+    my $first_delimiter_syntax = shift @ast;
     my ($type, $open_delimiter, $close_delimiter) = @$first_delimiter_syntax;
     if ($type != SYNTAX_DELIMITER) {
         croak "Invalid AST: Delimiter should be first syntax";
     }
 
-    $ast = do {
+    @ast = do {
         local $_DEFAULT_OPEN_DELIMITER = $open_delimiter;
         local $_DEFAULT_CLOSE_DELIMITER = $close_delimiter;
-        _optimize([@{$ast}[1..$#{$ast}]], 0);
+        _optimize(\@ast, 0);
     };
 
     # Optimize: empty
-    return sub { '' } if @$ast == 0;
+    return sub { '' } if @ast == 0;
 
     # Optimize: raw text only
-    if (@$ast == 1 && $ast->[0]->[0] == SYNTAX_RAW_TEXT) {
-        my (undef, $text) = @{ $ast->[0] };
-        if ($text =~ /[\r\n](?!\z)/mano) {
+    if (@ast == 1 && $ast[0][0] == SYNTAX_RAW_TEXT) {
+        my (undef, $text) = @{ $ast[0] };
+        if (!@CONTEXT_HINT && $text =~ /[\r\n](?!\z)/mano) {
             return sub {
-                defined $_PADDING ? $text =~ s/(\r\n?|\n)(?!\z)/${1}${_PADDING}/mgaor : $text
+                defined $_PADDING ? $text =~ s/(\r\n?|\n)(?!\z)/${1}${_PADDING}/mgar : $text
             };
         }
         return sub { $text };
@@ -62,7 +63,7 @@ sub compile {
         local $_DEFAULT_CLOSE_DELIMITER = $close_delimiter;
         local $_CURRENT_OPEN_DELIMITER = $open_delimiter;
         local $_CURRENT_CLOSE_DELIMITER = $close_delimiter;
-        _compile($ast, 4);
+        _compile(\@ast, 4);
     };
     die "Invalid AST: $@" if "$@";
 
@@ -115,10 +116,9 @@ sub _compile {
 sub _optimize {
     my ($ast, $depth) = @_;
 
-    my @ast = @$ast;
     my $raw_text_syntax;
     my @optimized_ast;
-    while (my $syntax = shift @ast) {
+    for my $syntax (@$ast) {
         if ($syntax->[0] == SYNTAX_RAW_TEXT) {
             if ($raw_text_syntax) {
                 $raw_text_syntax->[1] .= $syntax->[1];
@@ -178,9 +178,9 @@ sub _optimize {
                 $raw_text_syntax = undef;
             }
             if ($syntax->[0] == SYNTAX_BOX) {
-                my $children = _optimize($syntax->[-1], $depth+1);
+                my @children = _optimize($syntax->[-1], $depth+1);
                 $syntax = [@$syntax]; # shallow copy
-                $syntax->[-1] = $children;
+                $syntax->[-1] = \@children;
             }
             push @optimized_ast => $syntax;
         }
@@ -188,22 +188,22 @@ sub _optimize {
     if ($raw_text_syntax) {
         push @optimized_ast => $raw_text_syntax;
     }
-    return \@optimized_ast;
+    return @optimized_ast;
 }
 
 sub _compile_body {
     my ($ast, $indent, $result) = @_;
-    my @ast = @$ast;
 
     my $code = '';
-    while (my $syntax = shift @ast) {
+    for my $i (keys @$ast) {
+        my $syntax = $ast->[$i];
         my ($type) = @$syntax;
         if ($type == SYNTAX_RAW_TEXT) {
             my (undef, $text) = @$syntax;
             next if $result eq DISCARD_RESULT;
-            if (@ast ? $text =~ /[\r\n]/mano : $text =~ /[\r\n](?!\z)/mano) {
+            if ($i == $#{$ast} ? $text =~ /[\r\n](?!\z)/mano : $text =~ /[\r\n]/mano) {
                 my $regex = '(\r\n?|\n)';
-                $regex .= '(?!\z)' unless @ast;
+                $regex .= '(?!\z)' if $i == $#{$ast};
                 $code .= (' ' x $indent).'$_tmp = '.B::perlstring($text).";\n";
                 $code .= (' ' x $indent)."\$_tmp =~ s/$regex/\${1}\${_PADDING}/mago if defined \$_PADDING;\n";
                 $code .= (' ' x $indent)."$result .= \$_tmp;\n";

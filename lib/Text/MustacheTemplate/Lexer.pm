@@ -37,17 +37,18 @@ sub tokenize {
     local $OPEN_DELIMITER = $OPEN_DELIMITER;
     local $CLOSE_DELIMITER = $CLOSE_DELIMITER;
     local $_SOURCE = $source;
-    local @_TOKENS = ([TOKEN_DELIMITER, 0, undef, $OPEN_DELIMITER, $CLOSE_DELIMITER]);
+
+    my @tokens = ([TOKEN_DELIMITER, 0, undef, $OPEN_DELIMITER, $CLOSE_DELIMITER]);
     until ($_SOURCE =~ /\G\z/mgcano) {
         my $pos = pos $_SOURCE || 0;
         if ($_SOURCE =~ /\G\Q${OPEN_DELIMITER}\E([\{#\/&^!>\$<=])?/mgac) {
-            _tokenize_tag($1, $pos);
+            push @tokens => _tokenize_tag($1, $pos);
         } elsif ($_SOURCE =~ /\G(?:(^[[:blank:]]+)|(.+?)(^[[:blank:]]+)?)(?=\Q${OPEN_DELIMITER}\E|\z)/msgac) {
             if (defined $1) {
-                push @_TOKENS => [TOKEN_PADDING, $pos, $1];
+                push @tokens => [TOKEN_PADDING, $pos, $1];
             } else {
-                push @_TOKENS => [TOKEN_RAW_TEXT, $pos, $2];
-                push @_TOKENS => [TOKEN_PADDING, $pos+length($2), $3] if defined $3;
+                push @tokens => [TOKEN_RAW_TEXT, $pos, $2];
+                push @tokens => [TOKEN_PADDING, $pos+length($2), $3] if defined $3;
             }
         } else {
             _error('Syntax Error: Unexpected Token');
@@ -57,7 +58,7 @@ sub tokenize {
         _error('Syntax Error: Unexpected Token');
     }
 
-    return @_TOKENS;
+    return @tokens;
 }
 
 sub _tokenize_tag {
@@ -79,9 +80,10 @@ sub _tokenize_tag {
             }
             $OPEN_DELIMITER = $delimiters[0];
             $CLOSE_DELIMITER = $delimiters[1];
-            push @_TOKENS => [TOKEN_DELIMITER, $pos, $body, $OPEN_DELIMITER, $CLOSE_DELIMITER];
+            return [TOKEN_DELIMITER, $pos, $body, $OPEN_DELIMITER, $CLOSE_DELIMITER];
         } else {
-            push @_TOKENS => defined $type ? [TOKEN_TAG, $pos, $type, $body] : [TOKEN_TAG, $pos, $body];
+            return [TOKEN_TAG, $pos, $type, $body] if defined $type;
+            return [TOKEN_TAG, $pos, $body];
         }
     } else {
         _error('Syntax Error: Unexpected Token');
