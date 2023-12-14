@@ -114,41 +114,43 @@ The default value is falsey.
 
 =head1 BENCHMARK
 
+Result of F<author/benchmark.pl>:
+
     =============================
     parse
     =============================
     Benchmark: running Template::Mustache, Text::MustacheTemplate for at least 10 CPU seconds...
-    Template::Mustache: 10 wallclock secs (10.36 usr +  0.00 sys = 10.36 CPU) @ 748.26/s (n=7752)
-    Text::MustacheTemplate: 11 wallclock secs (10.49 usr +  0.02 sys = 10.51 CPU) @ 9560.04/s (n=100476)
-                             Rate     Template::Mustache Text::MustacheTemplate
-    Template::Mustache      748/s                     --                   -92%
-    Text::MustacheTemplate 9560/s                  1178%                     --
+    Template::Mustache: 11 wallclock secs (10.44 usr +  0.07 sys = 10.51 CPU) @ 748.33/s (n=7865)
+    Text::MustacheTemplate: 10 wallclock secs (10.51 usr +  0.01 sys = 10.52 CPU) @ 10028.52/s (n=105500)
+                              Rate     Template::Mustache Text::MustacheTemplate
+    Template::Mustache       748/s                     --                   -93%
+    Text::MustacheTemplate 10029/s                  1240%                     --
     =============================
     render
     =============================
     Benchmark: running Template::Mustache, Text::MustacheTemplate for at least 10 CPU seconds...
-    Template::Mustache: 11 wallclock secs (10.52 usr +  0.01 sys = 10.53 CPU) @ 729.34/s (n=7680)
-    Text::MustacheTemplate: 11 wallclock secs (10.61 usr +  0.02 sys = 10.63 CPU) @ 30540.55/s (n=324646)
+    Template::Mustache: 10 wallclock secs (10.49 usr +  0.02 sys = 10.51 CPU) @ 730.73/s (n=7680)
+    Text::MustacheTemplate: 11 wallclock secs (10.60 usr +  0.02 sys = 10.62 CPU) @ 32508.29/s (n=345238)
                               Rate     Template::Mustache Text::MustacheTemplate
-    Template::Mustache       729/s                     --                   -98%
-    Text::MustacheTemplate 30541/s                  4087%                     --
+    Template::Mustache       731/s                     --                   -98%
+    Text::MustacheTemplate 32508/s                  4349%                     --
     =============================
     render (contextual optimization)
     =============================
     Benchmark: running disabled for at least 10 CPU seconds...
-      disabled: 11 wallclock secs (10.51 usr +  0.02 sys = 10.53 CPU) @ 8941.41/s (n=94153)
+      disabled: 11 wallclock secs (10.50 usr +  0.02 sys = 10.52 CPU) @ 9471.20/s (n=99637)
                 Rate disabled  enabled
-    disabled  8941/s       --     -71%
-    enabled  30541/s     242%       --
+    disabled  9471/s       --     -71%
+    enabled  32508/s     243%       --
     =============================
     render(cached)
     =============================
     Benchmark: running Template::Mustache, Text::MustacheTemplate for at least 10 CPU seconds...
-    Template::Mustache: 10 wallclock secs (10.40 usr +  0.02 sys = 10.42 CPU) @ 49247.02/s (n=513154)
-    Text::MustacheTemplate: 11 wallclock secs (10.55 usr +  0.02 sys = 10.57 CPU) @ 230312.68/s (n=2434405)
+    Template::Mustache: 11 wallclock secs (10.49 usr +  0.01 sys = 10.50 CPU) @ 48871.81/s (n=513154)
+    Text::MustacheTemplate: 10 wallclock secs (10.57 usr +  0.01 sys = 10.58 CPU) @ 232286.39/s (n=2457590)
                                Rate     Template::Mustache Text::MustacheTemplate
-    Template::Mustache      49247/s                     --                   -79%
-    Text::MustacheTemplate 230313/s                   368%                     --
+    Template::Mustache      48872/s                     --                   -79%
+    Text::MustacheTemplate 232286/s                   375%                     --
 
 =head1 SEE ALSO
 
