@@ -41,7 +41,7 @@ sub tokenize {
     my @tokens = ([TOKEN_DELIMITER, 0, undef, $OPEN_DELIMITER, $CLOSE_DELIMITER]);
     until ($_SOURCE =~ /\G\z/mgcano) {
         my $pos = pos $_SOURCE || 0;
-        if ($_SOURCE =~ /\G\Q${OPEN_DELIMITER}\E([\{#\/&^!>\$<=])?/mgac) {
+        if ($_SOURCE =~ /\G\Q${OPEN_DELIMITER}\E([\{#\/&^!>\$<=])?/mgac) { # uncoverable branch false count:2
             push @tokens => _tokenize_tag($1, $pos);
         } elsif ($_SOURCE =~ /\G(?:(^[[:blank:]]+)|(.+?)(^[[:blank:]]+)?)(?=\Q${OPEN_DELIMITER}\E|\z)/msgac) {
             if (defined $1) {
@@ -51,11 +51,11 @@ sub tokenize {
                 push @tokens => [TOKEN_PADDING, $pos+length($2), $3] if defined $3;
             }
         } else {
-            _error('Syntax Error: Unexpected Token', pos $_SOURCE);
+            _error('Syntax Error: Unexpected Token', pos $_SOURCE); # uncoverable statement
         }
     }
-    if (length $_SOURCE != pos $_SOURCE) {
-        _error('Syntax Error: Unexpected Token', pos $_SOURCE);
+    if (length $_SOURCE != pos $_SOURCE) { # uncoverable branch true
+        _error('Syntax Error: Unexpected Token', pos $_SOURCE); # uncoverable statement
     }
 
     return @tokens;

@@ -9,21 +9,21 @@ sub generate_from_tokens {
 
     my ($open_delimiter, $close_delimiter) = do {
         my $token = shift @tokens;
-        die 'first token must be delimiter' if $token->[0] != TOKEN_DELIMITER;
+        die 'first token must be delimiter' if $token->[0] != TOKEN_DELIMITER; # uncoverable branch true
         @$token[3,4];
     };
 
     my $buf = '';
     for my $token (@tokens) {
         my ($type) = @$token;
-        if ($type == TOKEN_RAW_TEXT) {
+        if ($type == TOKEN_RAW_TEXT) { # uncoverable branch false count:4
             my (undef, undef, $text) = @$token;
             $buf .= $text;
         } elsif ($type == TOKEN_PADDING) {
             my (undef, undef, $padding) = @$token;
             $buf .= $padding;
         } elsif ($type == TOKEN_TAG) {
-            if (@$token == 3) {
+            if (@$token == 3) { # uncoverable branch false count:2
                 my (undef, undef, $body) = @$token;
                 $buf .= $open_delimiter.$body.$close_delimiter;
             } elsif (@$token == 4) {
@@ -32,14 +32,14 @@ sub generate_from_tokens {
                 $buf .= '}' if $tag_type eq '{';
                 $buf .= $close_delimiter;
             } else {
-                die "Unknown tag token size: ".scalar(@$token);
+                die "Unknown tag token size: ".scalar(@$token); # uncoverable statement
             }
         } elsif ($type == TOKEN_DELIMITER) {
             my (undef, undef, $body, $new_open_delimiter, $new_close_delimiter) = @$token;
             $buf .= $open_delimiter.'='.$body.'='.$close_delimiter;
             ($open_delimiter, $close_delimiter) = ($new_open_delimiter, $new_close_delimiter);
         } else {
-            die "Unknown token type: $type";
+            die "Unknown token type: $type"; # uncoverable statement
         }
     }
     return $buf;

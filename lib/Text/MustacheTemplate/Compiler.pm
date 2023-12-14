@@ -28,13 +28,13 @@ our $_CURRENT_CLOSE_DELIMITER;
 
 sub compile {
     my ($class, $ast) = @_;
-    die "Invalid AST: empty AST" unless @$ast;
+    die "Invalid AST: empty AST" unless @$ast; # uncoverable branch true
 
     my @ast = @$ast;
     my $first_delimiter_syntax = shift @ast;
     my ($type, $open_delimiter, $close_delimiter) = @$first_delimiter_syntax;
-    if ($type != SYNTAX_DELIMITER) {
-        croak "Invalid AST: Delimiter should be first syntax";
+    if ($type != SYNTAX_DELIMITER) { # uncoverable branch true
+        croak "Invalid AST: Delimiter should be first syntax"; # uncoverable statement
     }
 
     @ast = do {
@@ -65,7 +65,7 @@ sub compile {
         local $_CURRENT_CLOSE_DELIMITER = $close_delimiter;
         _compile(\@ast, 4);
     };
-    die "Invalid AST: $@" if "$@";
+    die "Invalid AST: $@" if "$@"; # uncoverable branch true
 
     # wrap to define function global variables
     $code = <<__CODE__;
@@ -75,11 +75,10 @@ do {
 $code
 };
 __CODE__
-
-    warn $code if DEBUG;
+    warn $code if DEBUG; # uncoverable branch true
 
     my $f = eval $code;
-    die $@ if $@;
+    die $@ if $@; # uncoverable branch true
     return $f;
 }
 
@@ -140,12 +139,12 @@ sub _optimize {
 
                     my $value = $name eq '.' ? $_CTX[-1] : retrieve_variable(\@_CTX, split /\./ano, $name);
                     next unless $value;
-                    if ($type == VARIABLE_HTML_ESCAPE) {
+                    if ($type == VARIABLE_HTML_ESCAPE) { # uncoverable branch false count:2
                         $value = escape_html($value);
                     } elsif ($type == VARIABLE_RAW) {
                         # nothing to do
                     } else {
-                        die "Unknown variable type: $type";
+                        die "Unknown variable type: $type"; # uncoverable statement
                     }
 
                     if ($raw_text_syntax) {
@@ -197,7 +196,7 @@ sub _compile_body {
     for my $i (keys @$ast) {
         my $syntax = $ast->[$i];
         my ($type) = @$syntax;
-        if ($type == SYNTAX_RAW_TEXT) {
+        if ($type == SYNTAX_RAW_TEXT) { # uncoverable branch false count:5
             my (undef, $text) = @$syntax;
             next if $result eq DISCARD_RESULT;
             if ($i == $#{$ast} ? $text =~ /[\r\n](?!\z)/mano : $text =~ /[\r\n]/mano) {
@@ -231,7 +230,7 @@ sub _compile_body {
             $code .= (' ' x $indent)."    \$Text::MustacheTemplate::REFERENCES{\$_name}->(\@_CTX);\n";
             $code .= (' ' x $indent)."} if exists \$Text::MustacheTemplate::REFERENCES{\$_name};\n";
         } else {
-            die "Unknown syntax: $type";
+            die "Unknown syntax: $type"; # uncoverable statement
         }
     }
     return $code;
@@ -241,14 +240,14 @@ sub _compile_variable {
     my ($syntax, $indent, $result) = @_;
 
     my (undef, $type, $name) = @$syntax;
-    if ($type == VARIABLE_HTML_ESCAPE) {
+    if ($type == VARIABLE_HTML_ESCAPE) { # uncoverable branch false count:2
         my $retriever = $name eq '.' ? '$_CTX[-1]' : 'retrieve_variable(\@_CTX, '.(join ', ', map B::perlstring($_), split /\./ano, $name).')';
         return (' ' x $indent)."$result .= escape_html($retriever // '');\n";
     } elsif ($type == VARIABLE_RAW) {
         my $retriever = $name eq '.' ? '$_CTX[-1]' : 'retrieve_variable(\@_CTX, '.(join ', ', map B::perlstring($_), split /\./ano, $name).')';
         return (' ' x $indent)."$result .= $retriever // '';\n";
     } else {
-        die "Unknown variable: $type";
+        die "Unknown variable: $type"; # uncoverable statement
     }
 }
 
@@ -256,7 +255,7 @@ sub _compile_box {
     my ($syntax, $indent, $result) = @_;
 
     my (undef, $type) = @$syntax;
-    if ($type == BOX_SECTION) {
+    if ($type == BOX_SECTION) { # uncoverable branch false count:4
         my (undef, undef, $name, $inner_template, $children) = @$syntax;
         my $no_lambda = @CONTEXT_HINT && !$Text::MustacheTemplate::LAMBDA_TEMPLATE_RENDERING;
 
@@ -339,7 +338,7 @@ sub _compile_box {
         $code .= (' ' x $indent)."}\n";
         return $code;
     } else {
-        die "Unknown box: $type";
+        die "Unknown box: $type"; # uncoverable statement
     }
 }
 

@@ -69,7 +69,7 @@ sub _parse {
         my $token = $tokens[$i];
 
         my ($type, $pos) = @$token;
-        if ($type == TOKEN_RAW_TEXT) {
+        if ($type == TOKEN_RAW_TEXT) { # uncoverable branch false count:4
             my (undef, undef, $text) = @$token;
             if ($i != 1) { # optimized $i >= 2: comes delimiter token when $i == 0 always, so the first raw text token should be $i == 1.
                 my $prev = $i-1; # $prev >= 1
@@ -101,7 +101,7 @@ sub _parse {
                 push @$ast => [SYNTAX_RAW_TEXT, $padding];
             }
         } elsif ($type == TOKEN_TAG) {
-            if (@$token == 3) {
+            if (@$token == 3) { # uncoverable branch false count:2
                 my (undef, undef, $tag_body) = @$token;
                 _error($token, 'Syntax Error: Must not contain newlines') if $tag_body =~ /[\r\n]/mo;
                 $tag_body =~ s/^\s+//ano;
@@ -115,7 +115,7 @@ sub _parse {
                     $tag_body =~ s/\s+$//ano;
                 }
 
-                if ($tag_type eq '{' || $tag_type eq '&') {
+                if ($tag_type eq '{' || $tag_type eq '&') { # uncoverable branch false count:8
                     push @$ast => [SYNTAX_VARIABLE, VARIABLE_RAW, $tag_body];
                 } elsif ($tag_type eq '!') {
                     push @$ast => [SYNTAX_COMMENT, $tag_body];
@@ -181,17 +181,17 @@ sub _parse {
                         push @$ast => [SYNTAX_PARTIAL, REFERENCE_STATIC, $name, $padding];
                     }
                 } else {
-                    _error($token, 'Syntax Error: Unexpected Token');                   
+                    _error($token, "Syntax Error: Unknown Tag Type: '$tag_type'"); # uncoverable statement
                 }
             } else {
-                _error($token, 'Syntax Error: Unknown Token'); 
+                _error($token, 'Syntax Error: Unknown Token'); # uncoverable statement
             }
         } elsif ($type == TOKEN_DELIMITER) {
             my @delimiters = @$token[3,4];
             $last_delimiter_token = $token;
             push @$ast => [SYNTAX_DELIMITER, @delimiters];
         } else {
-            _error($token, 'Syntax Error: Unknown Token'); 
+            _error($token, 'Syntax Error: Unknown Token'); # uncoverable statement
         }
     }
     if (@stack) {
