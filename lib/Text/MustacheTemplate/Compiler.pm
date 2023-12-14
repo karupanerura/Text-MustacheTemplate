@@ -137,9 +137,9 @@ sub _optimize {
                     local our $_OPEN_DELIMITER = $_DEFAULT_OPEN_DELIMITER;
                     local our $_CLOSE_DELIMITER = $_DEFAULT_CLOSE_DELIMITER;
                     local our @_CTX = @CONTEXT_HINT;
-                    local $Text::MustacheTemplate::Evaluator::LAMBDA_RENDERER = \&_render_template_in_context;
+                    local $Text::MustacheTemplate::Evaluator::LAMBDA_RENDERER = \&_render_template_in_context if $Text::MustacheTemplate::LAMBDA_TEMPLATE_RENDERING;
 
-                    my $value = retrieve_variable(\@_CTX, split /\./ano, $name);
+                    my $value = $name eq '.' ? $_CTX[-1] : retrieve_variable(\@_CTX, split /\./ano, $name);
                     next unless $value;
                     if ($type == VARIABLE_HTML_ESCAPE) {
                         $value = escape_html($value);
@@ -161,14 +161,14 @@ sub _optimize {
                         local our $_OPEN_DELIMITER = $_DEFAULT_OPEN_DELIMITER;
                         local our $_CLOSE_DELIMITER = $_DEFAULT_CLOSE_DELIMITER;
                         local our @_CTX = @CONTEXT_HINT;
-                        local $Text::MustacheTemplate::Evaluator::LAMBDA_RENDERER = \&_render_template_in_context;
-                        next unless evaluate_section_variable(\@_CTX, split /\./ano, $name);
+                        local $Text::MustacheTemplate::Evaluator::LAMBDA_RENDERER = \&_render_template_in_context if $Text::MustacheTemplate::LAMBDA_TEMPLATE_RENDERING;
+                        next unless $name eq '.' ? evaluate_section($_CTX[-1]) : evaluate_section_variable(\@_CTX, split /\./ano, $name);
                     } elsif ($type == BOX_INVERTED_SECTION) {
                         local our $_OPEN_DELIMITER = $_DEFAULT_OPEN_DELIMITER;
                         local our $_CLOSE_DELIMITER = $_DEFAULT_CLOSE_DELIMITER;
                         local our @_CTX = @CONTEXT_HINT;
-                        local $Text::MustacheTemplate::Evaluator::LAMBDA_RENDERER = \&_render_template_in_context;
-                        next if evaluate_section_variable(\@_CTX, split /\./ano, $name);
+                        local $Text::MustacheTemplate::Evaluator::LAMBDA_RENDERER = \&_render_template_in_context if $Text::MustacheTemplate::LAMBDA_TEMPLATE_RENDERING;
+                        next if $name eq '.' ? evaluate_section($_CTX[-1]) : evaluate_section_variable(\@_CTX, split /\./ano, $name);
                     }
                 }
             }
@@ -284,6 +284,7 @@ sub _compile_box {
             $code .=                          $inner_code;
             $code .= (' ' x $indent)."}\n";
             $code .= (' ' x $indent)."pop \@_CTX;\n";
+            return $code;
         }
 
         my $code = (' ' x $indent)."\@_section = $evaluator;\n";
