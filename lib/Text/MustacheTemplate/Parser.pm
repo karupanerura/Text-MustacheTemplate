@@ -142,6 +142,7 @@ sub _parse {
                     push @stack => [$i, $tag_body, $syntax, $ast];
                     $ast = [];
                 } elsif ($tag_type eq '/') {
+                    _error($token, 'Syntax Error: Unbalanced Section') unless @stack;
                     my $item = pop @stack;
                     my ($open_idx, $open_tag_body, $syntax, $parent) = @$item;
                     s/\s*//go for ($open_tag_body, $tag_body);
@@ -195,7 +196,7 @@ sub _parse {
     }
     if (@stack) {
         my $item = pop @stack;
-        my ($open_token) = @$item;
+        my (undef, undef, $open_token) = @$item;
         _error($open_token, 'Syntax Error: Unbalanced Section');
     }
     return \@root;
@@ -241,9 +242,9 @@ sub _error {
     croak $msg unless $SOURCE;
 
     my $src   = $SOURCE;
-    my $curr  = $token->[1] + 1;
+    my $curr  = $token->[1];
     my $line  = 1;
-    my $start = pos $src || 0;
+    my $start = 0;
     while ($src =~ /$/smgco and pos $src <= $curr) {
         $start = pos $src;
         $line++;

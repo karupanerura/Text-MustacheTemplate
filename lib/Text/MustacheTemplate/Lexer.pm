@@ -51,11 +51,11 @@ sub tokenize {
                 push @tokens => [TOKEN_PADDING, $pos+length($2), $3] if defined $3;
             }
         } else {
-            _error('Syntax Error: Unexpected Token');
+            _error('Syntax Error: Unexpected Token', pos $_SOURCE);
         }
     }
     if (length $_SOURCE != pos $_SOURCE) {
-        _error('Syntax Error: Unexpected Token');
+        _error('Syntax Error: Unexpected Token', pos $_SOURCE);
     }
 
     return @tokens;
@@ -72,11 +72,11 @@ sub _tokenize_tag {
             $delimiters =~ s/^\s+//ano;
             $delimiters =~ s/\s+$//ano;
             if ($delimiters =~ /=/ano) {
-                _error('Syntax Error: Invalid Delimiter');
+                _error('Syntax Error: Invalid Delimiter', $pos);
             }
             my @delimiters = split /\s+/, $delimiters;
             if (@delimiters != 2) {
-                _error('Syntax Error: Invalid Delimiter');
+                _error('Syntax Error: Invalid Delimiter', $pos);
             }
             $OPEN_DELIMITER = $delimiters[0];
             $CLOSE_DELIMITER = $delimiters[1];
@@ -86,18 +86,17 @@ sub _tokenize_tag {
             return [TOKEN_TAG, $pos, $body];
         }
     } else {
-        _error('Syntax Error: Unexpected Token');
+        _error('Syntax Error: Unexpected Token', $pos);
     }
 }
 
 sub _error {                                                                                                                           
-    my $msg = shift;
+    my ($msg, $curr) = @_;
 
     my $src   = $_SOURCE;
-    my $curr  = pos $_SOURCE || 0;
     my $line  = 1;
-    my $start = pos $src || 0;
-    while ($src =~ /$/smgco and pos $src <= $curr) {
+    my $start = 0;
+    while ($src =~ /$/smgco && pos $src <= $curr) {
         $start = pos $src;
         $line++;
     }
@@ -107,7 +106,7 @@ sub _error {
 
     my $trace = join "\n",
         "${msg}: line:$line",
-        substr($src, $start || 0, $end - $start),
+        substr($src, $start, $end - $start),
         (' ' x $len) . '^';
     croak $trace, "\n";
 }
