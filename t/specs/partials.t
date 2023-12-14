@@ -8,8 +8,6 @@ use JSON::PP qw/decode_json/;
 use Text::MustacheTemplate;
 use Text::MustacheTemplate::HTML;
 
-local $Text::MustacheTemplate::LAMBDA_TEMPLATE_RENDERING = 1;
-
 # emulate CGI.escapeHTML https://docs.ruby-lang.org/ja/latest/method/CGI/s/escapeHTML.html
 local $Text::MustacheTemplate::HTML::ESCAPE = do {
     my %m = (
@@ -33,7 +31,7 @@ subtest parse => sub {
             map { $_ => Text::MustacheTemplate->parse($case->{partials}->{$_}) } keys %{$case->{partials}}
         ) : ();
         my $template = Text::MustacheTemplate->parse($case->{template});
-        my $result = $template->(expand_lambda($case->{data}));
+        my $result = $template->($case->{data});
         is $result, $case->{expected}, $block->name;
     }
 };
@@ -44,31 +42,13 @@ subtest render => sub {
         local %Text::MustacheTemplate::REFERENCES = exists $case->{partials} ? (
             map { $_ => Text::MustacheTemplate->parse($case->{partials}->{$_}) } keys %{$case->{partials}}
         ) : ();
-        my $result = Text::MustacheTemplate->render($case->{template}, expand_lambda($case->{data}));
+        my $result = Text::MustacheTemplate->render($case->{template}, $case->{data});
         is $result, $case->{expected}, $block->name;
     }
 };
 
-sub expand_lambda {
-    my $data = shift;
-    if (ref $data eq 'HASH') {
-        if (exists $data->{__tag__} && $data->{__tag__} eq 'code') {
-            return eval $data->{perl};
-        } else {
-            my %h;
-            for my $key (keys %$data) {
-                $h{$key} = expand_lambda($data->{$key});
-            }
-            return \%h;
-        }
-    } elsif (ref $data eq 'ARRAY') {
-        return [map { expand_lambda($_) } @$data];
-    } else {
-        return $data;
-    }
-}
-
 done_testing;
+
 __DATA__
 === Basic Behavior: The greater-than operator should expand to the named partial.
 --- case
