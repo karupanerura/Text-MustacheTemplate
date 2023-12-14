@@ -204,7 +204,7 @@ sub _compile_body {
                 my $regex = '(\r\n?|\n)';
                 $regex .= '(?!\z)' if $i == $#{$ast};
                 $code .= (' ' x $indent).'$_tmp = '.B::perlstring($text).";\n";
-                $code .= (' ' x $indent)."\$_tmp =~ s/$regex/\${1}\${_PADDING}/mago if defined \$_PADDING;\n";
+                $code .= (' ' x $indent)."\$_tmp =~ s/$regex/\${1}\${_PADDING}/mag if defined \$_PADDING;\n";
                 $code .= (' ' x $indent)."$result .= \$_tmp;\n";
             } else {
                 $code .= (' ' x $indent).$result.' .= '.B::perlstring($text).";\n";
@@ -346,7 +346,7 @@ sub _compile_box {
 sub _render_template_in_context {
     my $source = shift;
     our ($_OPEN_DELIMITER, $_CLOSE_DELIMITER);
-    if ($source !~ /(?:\Q$_OPEN_DELIMITER\E|\Q$_CLOSE_DELIMITER\E)/mano) {
+    if ($source !~ /(?:\Q$_OPEN_DELIMITER\E|\Q$_CLOSE_DELIMITER\E)/man) {
         return $source;
     }
 
