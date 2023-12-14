@@ -17,4 +17,6 @@ on test => sub {
 on develop => sub {
     requires 'Template::Mustache';
     requires 'feature';
+    requires 'Data::Section::Simple';
+    requires 'Devel::Cover';
 };

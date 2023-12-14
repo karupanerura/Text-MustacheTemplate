@@ -33,6 +33,8 @@
       },
       "develop" : {
          "requires" : {
+            "Data::Section::Simple" : "0",
+            "Devel::Cover" : "0",
             "Template::Mustache" : "0",
             "Test::CPAN::Meta" : "0",
             "Test::MinimumVersion::Fast" : "0.04",

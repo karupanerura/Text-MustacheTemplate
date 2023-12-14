@@ -25,7 +25,7 @@ say '=============================';
 say 'render';
 say '=============================';
 my $render_result = timethese -10, {
-    'Template::Mustache'   => sub { Template::Mustache->render($template, \%vars) },
+    'Template::Mustache'     => sub { Template::Mustache->render($template, \%vars) },
     'Text::MustacheTemplate' => sub { Text::MustacheTemplate->render($template, \%vars) },
 };
 cmpthese $render_result;
