@@ -50,6 +50,10 @@ for my $block (blocks) {
 done_testing;
 __DATA__
 
+=== Empty
+--- input:
+--- vars: undef
+--- expected:
 === Variables
 --- input
 * {{name}}
@@ -279,3 +283,34 @@ Hello everyone!
 }
 --- expected
 <b>Hello World!</b>
+=== Set Delimiter
+--- input
+* {{foo}}
+{{=<% %>=}}
+* <% foo %>
+<%={{ }}=%>
+* {{ foo }}
+--- vars
+{
+    foo => 'foo!',
+}
+--- expected
+* foo!
+* foo!
+* foo!
+=== Set Delimiter in Block
+--- input
+* {{foo}}
+  {{$body}}{{=<% %>=}}
+* <% foo %>
+<%/body%>
+* <%#bar%>foo<%/bar%>
+--- vars
+{
+    foo => 'foo!',
+    bar => sub { '<%'.$_[0].'%>' },
+}
+--- expected
+* foo!
+* foo!
+* foo!
