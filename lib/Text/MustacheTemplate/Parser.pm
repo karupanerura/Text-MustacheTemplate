@@ -78,7 +78,10 @@ sub _parse {
                         $prev--;
                     }
                     my $before_prev_token = $prev != 1 ? $tokens[$prev-1] : undef;
-                    if (_is_trim_target($before_prev_token, $tokens[$prev], $token)) {
+                    my $is_empty_before_prev = !defined $before_prev_token || $before_prev_token->[0] == TOKEN_PADDING || (
+                        $before_prev_token->[0] == TOKEN_RAW_TEXT && $before_prev_token->[2] =~ /[\r\n]\z/mano
+                    );
+                    if ($is_empty_before_prev) {
                         $text =~ s/\A(\r\n|[\r\n])//mano;
                     }
                 }
@@ -87,15 +90,20 @@ sub _parse {
         } elsif ($type == TOKEN_PADDING) {
             my (undef, undef, $padding) = @$token;
             my $needs_padding = 1;
-            if ($i != $#tokens) { # optimized $i <= $#tokens
-                my $next = $i+1;
-                if (_needs_trim_around_whitespaces($tokens[$next])) {
-                    while ($next != $#tokens && _needs_trim_around_whitespaces($tokens[$next+1])) {
-                        $next++;
-                    }
-                    my $after_next_token = $next != $#tokens ? $tokens[$next+1] : undef;
-                    $needs_padding = !_is_trim_target($token, $tokens[$next], $after_next_token);
+            if ($i == $#tokens) { # uncoverable branch true
+                _error($token, 'Syntax Error: Padding token should not be last'); # uncoverable statement
+            }
+
+            my $next = $i+1;
+            if (_needs_trim_around_whitespaces($tokens[$next])) {
+                while ($next != $#tokens && _needs_trim_around_whitespaces($tokens[$next+1])) {
+                    $next++;
                 }
+                my $after_next_token = $next != $#tokens ? $tokens[$next+1] : undef;
+                my $is_empty_after_next = !defined $after_next_token || (
+                    $after_next_token->[0] == TOKEN_RAW_TEXT && $after_next_token->[2] =~ /\A[\r\n]/mano
+                );
+                $needs_padding = !$is_empty_after_next;
             }
             if ($needs_padding) {
                 push @$ast => [SYNTAX_RAW_TEXT, $padding];
@@ -200,23 +208,6 @@ sub _parse {
         _error($open_token, 'Syntax Error: Unbalanced Section');
     }
     return \@root;
-}
-
-sub _is_trim_target {
-    my ($prev, $token, $next) = @_;
-
-    my $is_empty_prev = !defined $prev || $prev->[0] == TOKEN_PADDING || (
-        $prev->[0] == TOKEN_RAW_TEXT && (
-            $prev->[2] eq '' || $prev->[2] =~ /[\r\n]\z/mano
-        )
-    ) || ($prev->[0] == TOKEN_DELIMITER && !defined $prev->[2]);
-    return unless $is_empty_prev;
-
-    my $is_empty_next = !defined $next || (
-        $next->[0] == TOKEN_RAW_TEXT && $next->[2] =~ /\A[\r\n]/mano
-    );
-    return unless $is_empty_next;
-    return !!1;
 }
 
 sub _needs_trim_around_whitespaces {
