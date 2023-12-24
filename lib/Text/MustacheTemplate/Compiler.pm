@@ -13,7 +13,7 @@ use Text::MustacheTemplate::Evaluator qw/retrieve_variable evaluate_section_vari
 use Text::MustacheTemplate::HTML qw/escape_html/;
 
 use constant {
-    DEBUG          => !!$ENV{PERL_TEXT_MUSTACHE_TINY_COMPILER_DEBUG},
+    DEBUG          => !!$ENV{PERL_TEXT_MUSTACHE_TEMPLATE_COMPILER_DEBUG},
     DISCARD_RESULT => '##DISCARD##',
 };
 
