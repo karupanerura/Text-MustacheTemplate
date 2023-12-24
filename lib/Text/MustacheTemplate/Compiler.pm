@@ -211,15 +211,13 @@ sub _compile_body {
             } else {
                 $code .= (' ' x $indent).$result.' .= '.B::perlstring($text).";\n";
             }
+        } elsif ($type == SYNTAX_VARIABLE) {
+            $code .= _compile_variable($syntax, $indent, $result);
         } elsif ($type == SYNTAX_DELIMITER) {
             my (undef, $open_delimiter, $close_delimiter) = @$syntax;
             ($_CURRENT_OPEN_DELIMITER, $_CURRENT_CLOSE_DELIMITER) = ($open_delimiter, $close_delimiter);
-        } elsif ($type == SYNTAX_VARIABLE) {
-            $code .= _compile_variable($syntax, $indent, $result);
         } elsif ($type == SYNTAX_BOX) {
             $code .= _compile_box($syntax, $indent, $result);
-        } elsif ($type == SYNTAX_COMMENT) {
-            # ignore
         } elsif ($type == SYNTAX_PARTIAL) {
             my (undef, $reference, $name, $padding) = @$syntax;
             $padding = B::perlstring($padding) if $padding;
@@ -235,6 +233,8 @@ sub _compile_body {
             $code .= (' ' x $indent)."    local \$_PADDING = $padding;\n" if $padding;
             $code .= (' ' x $indent)."    \$Text::MustacheTemplate::REFERENCES{\$_name}->(\@_CTX);\n";
             $code .= (' ' x $indent)."} if exists \$Text::MustacheTemplate::REFERENCES{\$_name};\n";
+        } elsif ($type == SYNTAX_COMMENT) {
+            # ignore
         } else {
             die "Unknown syntax: $type"; # uncoverable statement
         }
