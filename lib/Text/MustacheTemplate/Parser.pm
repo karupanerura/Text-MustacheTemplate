@@ -245,7 +245,7 @@ sub _error {
     my $curr  = $token->[1];
     my $line  = 1;
     my $start = 0;
-    while ($src =~ /$/smgco and pos $src <= $curr) {
+    while ($src =~ /$/smgco and pos $src <= $curr) {# uncoverable condition left
         $start = pos $src;
         $line++;
     }

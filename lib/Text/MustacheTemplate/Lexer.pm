@@ -96,7 +96,7 @@ sub _error {
     my $src   = $_SOURCE;
     my $line  = 1;
     my $start = 0;
-    while ($src =~ /$/smgco && pos $src <= $curr) {
+    while ($src =~ /$/smgco && pos $src <= $curr) {# uncoverable condition left
         $start = pos $src;
         $line++;
     }

@@ -196,7 +196,10 @@ sub _compile_body {
     for my $i (keys @$ast) {
         my $syntax = $ast->[$i];
         my ($type) = @$syntax;
-        if ($type == SYNTAX_RAW_TEXT) { # uncoverable branch false count:5
+
+        # uncoverable branch true count:6
+        # uncoverable branch false count:5..6
+        if ($type == SYNTAX_RAW_TEXT) {
             my (undef, $text) = @$syntax;
             next if $result eq DISCARD_RESULT;
             if ($i == $#{$ast} ? $text =~ /[\r\n](?!\z)/mano : $text =~ /[\r\n]/mano) {
@@ -220,9 +223,12 @@ sub _compile_body {
         } elsif ($type == SYNTAX_PARTIAL) {
             my (undef, $reference, $name, $padding) = @$syntax;
             $padding = B::perlstring($padding) if $padding;
+
+            # uncoverable branch false count:2
             my $retriever = $reference == REFERENCE_DYNAMIC ? ($name eq '.' ? '$_CTX[-1]' : 'retrieve_variable(\@_CTX, '.(join ', ', map B::perlstring($_), split /\./ano, $name).')')
                           : $reference == REFERENCE_STATIC  ? B::perlstring($name)
                           : die "Unknown reference: $reference";
+
             $code .= (' ' x $indent)."\$_name = $retriever;\n";
             $code .= (' ' x $indent)."$result .= do {\n";
             $code .= (' ' x $indent)."    local \$_PADDING;\n" unless $padding;
@@ -323,9 +329,12 @@ sub _compile_box {
     } elsif ($type == BOX_PARENT) {
         local $_PARENT = $syntax;
         my (undef, undef, $reference, $name, $children) = @$syntax;
+
+        # uncoverable branch false count:2
         my $retriever = $reference == REFERENCE_DYNAMIC ? ($name eq '.' ? '$_CTX[-1]' : 'retrieve_variable(\@_CTX, '.(join ', ', map B::perlstring($_), split /\./ano, $name).')')
                       : $reference == REFERENCE_STATIC  ? B::perlstring($name)
                       : die "Unknown reference: $type";
+
         my $code = (' ' x $indent)."{\n";
         $code .= (' ' x $indent)."    \$_name = $retriever;\n";
         $code .= (' ' x $indent)."    my \$_parent = \$Text::MustacheTemplate::REFERENCES{\$_name} or croak \"Unknown parent template: \$_name\";\n";
