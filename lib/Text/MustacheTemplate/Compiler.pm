@@ -409,7 +409,56 @@ The APIs may be change without notice.
 
 =over 2
 
-=item compile
+=item compile($ast)
+
+Compiles the abstract syntax tree (AST) from L<Text::MustacheTemplate::Parser> into a Perl code reference (CodeRef) that renders the template when called.
+
+Parameters:
+=over 4
+
+=item $ast - The abstract syntax tree structure from the parser
+
+=back
+
+Returns a CodeRef that takes a context scalar value and returns the rendered template string.
+
+=back
+
+=head1 DESCRIPTION
+
+Text::MustacheTemplate::Compiler takes the parsed AST and transforms it into executable Perl code that can efficiently render the template with a given context.
+This module handles the optimization of the compilation process and creates specialized code paths depending on the template structure.
+
+The compiler performs several optimizations:
+
+=over 4
+
+=item * Direct interpolation of static text
+
+=item * Specialized handling for arrays, hashes, and lambda functions in section blocks
+
+=item * Optimized variable lookup with dot notation support
+
+=item * Proper handling of context stacking
+
+=back
+
+=head1 INTERNALS
+
+The compiler uses string eval to generate efficient Perl code that handles the template rendering.
+It creates a closure that has access to utility functions for HTML escaping, context resolution, etc.
+
+The following internal optimizations are used:
+
+=over 4
+
+=item * Avoiding unnecessary concatenations for performance
+
+=item * Proper scope handling for nested sections 
+
+=item * Special handling for lambda functions in templates
+
+=item * Context path resolution that follows Mustache specification
 
 =back
 

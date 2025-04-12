@@ -37,7 +37,7 @@ __END__
 
 =head1 NAME
 
-Text::MustacheTemplate - mustache template engine
+Text::MustacheTemplate - Fast and specification compliant Mustache template engine for Perl
 
 =head1 SYNOPSIS
 
