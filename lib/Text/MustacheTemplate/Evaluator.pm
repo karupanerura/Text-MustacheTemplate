@@ -111,9 +111,13 @@ Retrieves a value from the context stack by following the given path.
 Returns the value if found, otherwise undef.
 
 Parameters:
+
 =over 8
+
 =item \@context - An array reference to the context stack
+
 =item @path - The dot-separated path components to the variable
+
 =back
 
 =item evaluate_section($value)
@@ -122,17 +126,27 @@ Evaluates whether a section should be rendered and how it should be processed.
 Returns an array of context objects for iteration.
 
 Parameters:
+
 =over 8
+
 =item $value - The value to evaluate
+
 =back
 
 For different value types:
+
 =over 8
+
 =item * Undefined or falsy values: Returns an empty array (section not rendered)
+
 =item * Array references: Returns the array elements for iteration
+
 =item * Hash references: Returns the hash reference itself for context
+
 =item * Code references: Returns the code reference for lambda processing
+
 =item * True scalar values: Returns the value as a single-element array
+
 =back
 
 =item evaluate_section_variable(\@context, @path)
@@ -141,9 +155,13 @@ Retrieves a variable by path and evaluates it as a section.
 Combines retrieve_variable and evaluate_section.
 
 Parameters:
+
 =over 8
+
 =item \@context - An array reference to the context stack
+
 =item @path - The dot-separated path components to the variable
+
 =back
 
 =back
