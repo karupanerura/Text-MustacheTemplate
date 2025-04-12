@@ -132,7 +132,7 @@ Text::MustacheTemplate::Lexer - Simple mustache template lexer
 
 =head1 DESCRIPTION
 
-Text::MustacheTemplate::Lexer is a simple lexer for Mustache tempalte.
+Text::MustacheTemplate::Lexer is a simple lexer for Mustache template.
 
 This is low-level interface for Text::MustacheTemplate.
 The APIs may be change without notice.
@@ -143,7 +143,7 @@ The APIs may be change without notice.
 
 =item tokenize($source)
 
-Converts the given source template string into tokens. Returns an array of token tuples.
+Converts the given source template string into tokens. Returns an array of token tuple.
 
 Each token is an array reference in the form C<[$token_type, $position, $data, ...]> where:
 

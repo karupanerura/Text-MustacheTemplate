@@ -276,7 +276,7 @@ Text::MustacheTemplate::Parser - Simple mustache template parser
 
 =head1 DESCRIPTION
 
-Text::MustacheTemplate::Parser is a simple parser for Mustache tempalte.
+Text::MustacheTemplate::Parser is a simple parser for Mustache template.
 
 This is low-level interface for Text::MustacheTemplate.
 The APIs may be change without notice.
@@ -354,7 +354,7 @@ $inner_template contains the raw template source of the section for lambda suppo
 
 =item BOX_INVERTED_SECTION
 
-An inverted section ({{^section}}...{{/section}}) which renders when the value is falsey.
+An inverted section ({{^section}}...{{/section}}) which renders when the value is falsy.
 
 Format: C<[SYNTAX_BOX, BOX_INVERTED_SECTION, $name, \@children]>
 

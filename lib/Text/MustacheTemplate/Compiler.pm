@@ -400,7 +400,7 @@ Text::MustacheTemplate::Compiler - Simple mustache template compiler
 
 =head1 DESCRIPTION
 
-Text::MustacheTemplate::Compiler is a compiler for Mustache tempalte.
+Text::MustacheTemplate::Compiler is a compiler for Mustache template.
 
 This is low-level interface for Text::MustacheTemplate.
 The APIs may be change without notice.
@@ -414,6 +414,7 @@ The APIs may be change without notice.
 Compiles the abstract syntax tree (AST) from L<Text::MustacheTemplate::Parser> into a Perl code reference (CodeRef) that renders the template when called.
 
 Parameters:
+
 =over 4
 
 =item $ast - The abstract syntax tree structure from the parser

@@ -72,7 +72,7 @@ By using `local`, this change can be localized.
 - $LAMBDA\_TEMPLATE\_RENDERING
 
     When this flag is truthy, lambda template rendering is enabled.
-    The default value is falsey.
+    The default value is falsy.
 
 # BENCHMARK
 

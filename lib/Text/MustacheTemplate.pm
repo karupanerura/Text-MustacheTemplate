@@ -108,7 +108,7 @@ It's used by inheritance or partial template feature.
 =item $LAMBDA_TEMPLATE_RENDERING
 
 When this flag is truthy, lambda template rendering is enabled.
-The default value is falsey.
+The default value is falsy.
 
 =back
 
